@@ -105,8 +105,8 @@ b.template = "cbi/network_netlist"
 b.nocreate = true
 b.unspecified = true
 
-function b.cfgvalue(...)
-	local v = Value.cfgvalue(...)
+function b.cfgvalue(self, section)
+	local v = Value.cfgvalue(self, section)
 	if v then
 		return (net:get_status_by_address(v))
 	end
