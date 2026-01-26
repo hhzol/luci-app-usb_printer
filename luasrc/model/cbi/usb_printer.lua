@@ -111,10 +111,10 @@ end
 
 -- 端口
 p = s:option(ListValue, "port", translate("Port"),
-    translate("TCP listener port."))
+    translate("TCP listener port.")) 
 p.rmempty = true
-for i = 0, 9 do
-    p:value(i, 9100 + i)
+for i = 9100, 9109 do
+    p:value(i, tostring(i))
 end
 
 s:option(Flag, "bidirectional", translate("Bidirectional mode"))
