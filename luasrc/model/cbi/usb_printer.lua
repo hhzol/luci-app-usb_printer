@@ -16,7 +16,6 @@ $Id$
 require "luci.util"
 local uci = luci.model.uci.cursor_state()
 local net = require "luci.model.network"
-local netm = net.init(uci)
 
 m = Map("usb_printer", translate("USB Printer Server"),
 	translate("Shares multiple USB printers via TCP/IP.<br />When modified bingings, re-plug usb connectors to take effect.<br />This module requires kmod-usb-printer."))
@@ -101,23 +100,24 @@ for key, item in ipairs(printers) do
 	d:value(item["product"], item["description"] .. " [" .. item["id"] .. "]")
 end
 
-b = s:option(ListValue, "bind", translate("Interface"), translate("Specifies the interface to listen on."))
-b.rmempty = true
+b = s:option(Value, "bind", translate("Interface"), translate("Specifies the interface to listen on."))
+b.template = "cbi/network_netlist"
+b.nocreate = true
+b.unspecified = true
 
-for _, n in ipairs(netm:get_networks()) do
-    b:value(n:name(), n:name())
+function b.cfgvalue(...)
+	local v = Value.cfgvalue(...)
+	if v then
+		return (net:get_status_by_address(v))
+	end
 end
 
 function b.write(self, section, value)
-    local n = netm:get_network(value)
-    if n then
-        local ip = n:ipaddr() or {"0.0.0.0"}
-        Value.write(self, section, ip[1])
-    else
-        Value.write(self, section, "0.0.0.0")
-    end
+	local n = net:get_network(value)
+	if n and n:ipaddr() then
+		Value.write(self, section, n:ipaddr())
+	end
 end
-
 
 p = s:option(ListValue, "port", translate("Port"), translate("TCP listener port."))
 p.rmempty = true
